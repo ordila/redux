@@ -1,4 +1,5 @@
-import { Component } from 'react';
+import { useState } from 'react';
+import React from 'react';
 import { nanoid } from 'nanoid';
 
 const INITIAL_STATE = {
@@ -6,28 +7,27 @@ const INITIAL_STATE = {
   phone: '',
 };
 
-export default class ContactForm extends Component {
-  state = { ...INITIAL_STATE };
+const ContactForm = ({ onAdd, onCheckUnique }) => {
+  const [data, setData] = useState({ ...INITIAL_STATE });
 
-  onChangeInput = event => {
+  const onChangeInput = event => {
     const { name, value } = event.target;
-    this.setState({ [name]: value });
+    setData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  handleFormSubmit = event => {
+  const handleFormSubmit = event => {
     event.preventDefault();
-    const { name, phone } = this.state;
-    const { onAdd } = this.props;
-    const isValidateForm = this.validateForm();
+    const { name, phone } = data;
+    const isValidateForm = validateForm();
     if (!isValidateForm) return;
     onAdd({ id: nanoid(), name, phone });
-    this.setState({ ...INITIAL_STATE });
+    setData({ ...INITIAL_STATE });
   };
-
-  validateForm = () => {
-    const { name, phone } = this.state;
-    const { onCheckUnique } = this.props;
-
+  const validateForm = () => {
+    const { name, phone } = data;
     if (!name || !phone) {
       alert('Заповніть усі поля');
       return false;
@@ -41,25 +41,23 @@ export default class ContactForm extends Component {
     }
   };
 
-  render() {
-    const { name, phone } = this.state;
+  return (
+    <form onSubmit={handleFormSubmit}>
+      <input
+        type="text"
+        value={data.name}
+        name="name"
+        onChange={onChangeInput}
+      />
+      <input
+        type="tel"
+        value={data.phone}
+        name="phone"
+        onChange={onChangeInput}
+      />
+      <button type="submit">Додати</button>
+    </form>
+  );
+};
 
-    return (
-      <form onSubmit={this.handleFormSubmit}>
-        <input
-          type="text"
-          value={name}
-          name="name"
-          onChange={this.onChangeInput}
-        />
-        <input
-          type="tel"
-          value={phone}
-          name="phone"
-          onChange={this.onChangeInput}
-        />
-        <button type="submit">Додати</button>
-      </form>
-    );
-  }
-}
+export default ContactForm;
